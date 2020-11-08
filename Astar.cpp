@@ -6,20 +6,20 @@
 #include <time.h>
 #include<string.h>
 using namespace std;
-const int MAX_N = 100;            //地图长
-const int MAX_M = 100;            //地图宽
-const int MAX_K = 50;
-const int Queue_len = MAX_N * MAX_M + MAX_K;
+const int MAXN = 100;            //地图长
+const int MAXM = 100;            //地图宽
+const int MAXK = 50;
+const int Queue_len = MAXN * MAXM + MAXK;
 //四个方向
 const int dx[4] = { 0 ,0, -1, 1 };
 const int dy[4] = { 1, -1, 0, 0 };
 int un,um,uk;
 int n, m, k;
-bool if_create_map = true;
+bool if_setnew_map = true;
 int center_len, center_x, center_y;    //表示终点周围center_len * center_len的地方是空地, 以及终点的位置
 int rand_barrier = 10;          // 表示有1/rand_barrier的概率生成有障碍的点。
-char mapBuffer[MAX_N][MAX_M];   //地图数据
-int vis[MAX_N][MAX_M];
+char mapBuffer[MAXN][MAXM];   //地图数据
+int vis[MAXN][MAXM];
 
 
 struct point{
@@ -28,8 +28,8 @@ struct point{
 		x = -1;
 		y = -1;
 	}
-} path[MAX_K][Queue_len];
-int path_len[MAX_K];
+} path[MAXK][Queue_len];
+int path_len[MAXK];
 
 struct Node {
     int x, y;                 // 坐标值
@@ -42,7 +42,7 @@ struct Node {
     }
 };
 
-Node start_Node[MAX_K + 1];
+Node start_Node[MAXK + 1];
 
 //比较器，用以优先队列的指针类型比较
 struct NodePtrCompare {
@@ -55,7 +55,7 @@ struct NodePtrCompare {
 std::priority_queue<Node*, std::vector<Node*>, NodePtrCompare> openlist;
 
 //如果超出地图边界了,就返回true，否则返回false。
-bool check_out_of_bound(int tx, int ty) {
+bool checkoutof_bound(int tx, int ty) {
     if (tx < 0 || ty < 0 || tx >= n || ty >= m)
         return true;
     return false;
@@ -67,7 +67,7 @@ void explore(Node& cur_node) {
     {
         int tx = cur_node.x + dx[i];
         int ty = cur_node.y + dy[i];
-        if (!check_out_of_bound(tx, ty) && vis[tx][ty] == 0 && mapBuffer[tx][ty] != 'X') {
+        if (!checkoutof_bound(tx, ty) && vis[tx][ty] == 0 && mapBuffer[tx][ty] != 'X') {
         	Node *tmp = new Node(tx, ty, cur_node.cost + 1, &cur_node);
             openlist.push(tmp);
         }
@@ -76,7 +76,7 @@ void explore(Node& cur_node) {
 }
 
 //开始搜索路径
-std::list<Node*> findpath(Node snode) {
+std::list<Node*> pathfinding(Node snode) {
 	while (!openlist.empty()) openlist.pop();
     std::list<Node*> road;
     memset(vis, 0, sizeof(vis));
@@ -100,16 +100,16 @@ void dfs(int x, int y) {
     for (int i = 0; i < 4; i++) {
         int tx = x + dx[i];
         int ty = y + dy[i];
-        if (!check_out_of_bound(tx, ty) && vis[tx][ty] == 0 && mapBuffer[tx][ty] != 'X') {
+        if (!checkoutof_bound(tx, ty) && vis[tx][ty] == 0 && mapBuffer[tx][ty] != 'X') {
             dfs(tx, ty);
         }
     }
 }
 
-void readMap(){
+void loadMap(){
 	int cnt = 0;
-    int qx[2 * (MAX_N + MAX_M)]; int qy[2 * (MAX_N + MAX_M)];
-    int idx[MAX_K];
+    int qx[2 * (MAXN + MAXM)]; int qy[2 * (MAXN + MAXM)];
+    int idx[MAXK];
     for (int i = 0; i <= n; i++)
     {
         if (mapBuffer[i][0] == 'E') {
@@ -149,7 +149,7 @@ void readMap(){
 }
 
 //创建地图 如果出口数不足k个，就return false，否则return true
-bool createMap() {
+bool setMap() {
     //随机生成地图
     for (int i = 0; i < n; ++i)
         for (int j = 0; j < m; ++j) {
@@ -168,7 +168,7 @@ bool createMap() {
         {
             int tx = i + center_x; int ty = j + center_y;
             if (tx == center_x && ty == center_y) continue;
-            if (check_out_of_bound(tx, ty)) continue;
+            if (checkoutof_bound(tx, ty)) continue;
             mapBuffer[tx][ty] = '.';
         }
 
@@ -176,8 +176,8 @@ bool createMap() {
     memset(vis, 0, sizeof(vis));
     dfs(center_x, center_y);
     int cnt = 0;
-    int qx[2 * (MAX_N + MAX_M)]; int qy[2 * (MAX_N + MAX_M)];
-    int idx[MAX_K];
+    int qx[2 * (MAXN + MAXM)]; int qy[2 * (MAXN + MAXM)];
+    int idx[MAXK];
     for (int i = 0; i <= n; i++)
     {
         if (vis[i][0] == 1) {
@@ -236,7 +236,7 @@ void printMap() {
 void perform_single(int l){
 	cout << endl << endl;
 	cout << "The total length is " << path_len[l] << endl;
-	char tmp[MAX_N][MAX_M];
+	char tmp[MAXN][MAXM];
 	for (int i = 0; i < n; i++)
 	  for (int j = 0; j < m; j++){
 	  	tmp[i][j] = mapBuffer[i][j];
@@ -254,16 +254,16 @@ void perform_single(int l){
 	  }		
 }
 
-point current[MAX_K][Queue_len];
-point pre[MAX_K];
-int q[MAX_K];
-int last_time[MAX_K];
-bool block[MAX_K];
+point current[MAXK][Queue_len];
+point pre[MAXK];
+int q[MAXK];
+int last_time[MAXK];
+bool block[MAXK];
 
 
 void perform_all(int time_len){
 	cout << "The total length is " << time_len << endl;
-	char tmp[MAX_N][MAX_M];
+	char tmp[MAXN][MAXM];
 	for (int i = 0; i < n; i++)
 	  for (int j = 0; j < m; j++){
 	  	tmp[i][j] = mapBuffer[i][j];
@@ -365,9 +365,9 @@ void generate_and_save(int number){
 		m = rand() % (um - 9) + 10;
 		k = rand() % (uk - 1) + 2;
 		cout << cnt << " " <<  n << " " << " " << m << " " << k << endl; 
-		bool b = createMap();
+		bool b = setMap();
 		while (!b) {
-			b = createMap();
+			b = setMap();
 		}
 		printMap();
 		cnt = cnt + 1;
@@ -405,16 +405,16 @@ int type_int(int down, int up){
 void process(){
 	srand(time(NULL));
     //创建地图
-    if (if_create_map == true)
-		createMap();
+    if (if_setnew_map == true)
+		setMap();
 	else
-		readMap();
+		loadMap();
 	cout << "-----------1. The generated map is as follows:-----------" << endl;
 	printMap();
 	for (int i = 0; i < k; i++)
 	{
 		//A*搜索得到一条路径
-	    std::list<Node*> road = findpath(start_Node[i]);
+	    std::list<Node*> road = pathfinding(start_Node[i]);
 	    //将A*搜索的路径经过的点标记为'O'
 	    
 	    path_len[i] = road.size();
@@ -526,7 +526,7 @@ int main() {
 			}
 			
 			
-			if_create_map = false;
+			if_setnew_map = false;
 			process();
 		}
 	} 
